@@ -10,7 +10,11 @@ First create a Docker volume to hold the PostgreSQL database that will contain t
 
 Next, download an .osm.pbf extract from geofabrik.de for the region that you're interested in. You can then start importing it into PostgreSQL by running a container and mounting the file as `/data.osm.pbf`. For example:
 
-    docker run -v /absolute/path/to/luxembourg.osm.pbf:/data.osm.pbf -v openstreetmap-data:/var/lib/postgresql/10/main overv/openstreetmap-tile-server import
+    docker run \n
+    -v /absolute/path/to_addtional_postgres_config:/postgresql.conf \n
+    -v /absolute/path/to/luxembourg.osm.pbf:/data.osm.pbf \n
+    -v openstreetmap-data:/var/lib/postgresql/10/main \n
+    overv/openstreetmap-tile-server import
 
 If the container exits without errors, then your data has been successfully imported and you are now ready to run the tile server.
 
