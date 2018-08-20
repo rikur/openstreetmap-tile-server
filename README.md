@@ -10,11 +10,7 @@ First create a Docker volume to hold the PostgreSQL database that will contain t
 
 Next, download an .osm.pbf extract from geofabrik.de for the region that you're interested in. You can then start importing it into PostgreSQL by running a container and mounting the file as `/data.osm.pbf`. For example:
 
-    docker run \n
-    -v /absolute/path/to_addtional_postgres_config:/postgresql.conf \n
-    -v /absolute/path/to/luxembourg.osm.pbf:/data.osm.pbf \n
-    -v openstreetmap-data:/var/lib/postgresql/10/main \n
-    a-hahn/openstreetmap-tile-server import
+    docker run -v /absolute/path/to/luxembourg.osm.pbf:/data.osm.pbf -v openstreetmap-data:/var/lib/postgresql/10/main a-hahn/openstreetmap-tile-server import
 
 If the container exits without errors, then your data has been successfully imported and you are now ready to run the tile server.
 
@@ -22,9 +18,15 @@ If the container exits without errors, then your data has been successfully impo
 
 Run the server like this:
 
-    docker run -p 80:80 -v openstreetmap-data:/var/lib/postgresql/10/main -d a-hahn/openstreetmap-tile-server run
+    docker run --shm-size 14g -p 80:80 -v osm-europe-data:/var/lib/postgresql/10/main -v /home/ubuntu/osm:/etc/postgresql/10/main/conf.d a-hahn/openstreetmap-tile-server:latest run
 
 Your tiles will now be available at http://localhost:80/tile/{z}/{x}/{y}.png. If you open `leaflet-demo.html` in your browser, you should be able to see the tiles served by your own machine. Note that it will initially quite a bit of time to render the larger tiles for the first time.
+
+## Debugging the service mode
+
+Just substitute the 'run' command with 'debug' like so:
+
+    docker run --shm-size 14g -p 80:80 -v osm-europe-data:/var/lib/postgresql/10/main -v /home/ubuntu/osm:/etc/postgresql/10/main/conf.d a-hahn/openstreetmap-tile-server:latest debug
 
 ## Preserving rendered tiles
 

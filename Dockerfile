@@ -88,9 +88,6 @@ USER renderer
 # Install PostgreSQL
 USER root
 RUN apt-get install -y postgresql postgresql-contrib postgis postgresql-10-postgis-2.4
-
-# additional postgresql.conf that overrides existing settings
-RUN echo "include_if_exists '/postgresql.conf'" >> /etc/postgresql/10/main/postgresql.conf
 USER renderer
 
 # Start running
