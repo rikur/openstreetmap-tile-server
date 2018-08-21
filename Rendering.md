@@ -25,6 +25,12 @@ and increasing the containers shared memory size.
 
 See the modifications in *apache.conf*
 
+## Modify apache.conf to support cors headers
+
+This seems to be a reqirement at least when we want to support post rendering grayscale maps via [Leaflet grayscale](https://github.com/Zverik/leaflet-grayscale)
+ 
+See [enable cors on Apache](https://enable-cors.org/server_apache.html)
+
 # Other useful links
 
 * The original author Alexander Overvoorde 'dockerized' the recipe from
