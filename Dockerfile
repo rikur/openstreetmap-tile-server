@@ -89,6 +89,7 @@ USER renderer
 # Install PostgreSQL
 USER root
 RUN apt-get install -y postgresql postgresql-contrib postgis postgresql-10-postgis-2.4
+COPY postgresql.conf /etc/postgresql/10/main/conf.d/cogito.conf
 USER renderer
 
 # Start running
