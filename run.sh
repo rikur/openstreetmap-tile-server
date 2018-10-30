@@ -27,6 +27,21 @@ if [ "$1" = "import" ]; then
     fi
 
     # Import data
+    sudo -u renderer osm2pgsql -d gis --slim -G --hstore --tag-transform-script /home/renderer/src/openstreetmap-carto/openstreetmap-carto.lua -C 2048 --number-processes ${THREADS:-4} -S /home/renderer/src/openstreetmap-carto/openstreetmap-carto.style /data.osm.pbf
+
+    exit 0
+fi
+
+if [ "$1" = "import-next" ]; then
+    # Initialize PostgreSQL
+    service postgresql start
+
+    # Download Luxembourg as sample if no data is provided
+    if [ ! -f /data.osm.pbf ]; then
+        echo "WARNING: No import file at /data.osm.pbf"
+    fi
+
+    # Import data
     sudo -u renderer osm2pgsql -d gis --append --slim -G --hstore --tag-transform-script /home/renderer/src/openstreetmap-carto/openstreetmap-carto.lua -C 2048 --number-processes ${THREADS:-4} -S /home/renderer/src/openstreetmap-carto/openstreetmap-carto.style /data.osm.pbf
 
     exit 0
