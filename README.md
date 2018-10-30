@@ -8,43 +8,47 @@ First create a Docker volume to hold the PostgreSQL database that will contain t
 
     docker volume create openstreetmap-data
 
+Tiles that have already been rendered will be stored in `/var/lib/mod_tile`. To make sure that this data survives container restarts, you should create another volume for it:
+
+    docker volume create openstreetmap-rendered-tiles
+
 Next, download an .osm.pbf extract from geofabrik.de for the region that you're interested in. You can then start importing it into PostgreSQL by running a container and mounting the file as `/data.osm.pbf`. For example:
 
-    docker run -v /absolute/path/to/luxembourg.osm.pbf:/data.osm.pbf -v openstreetmap-data:/var/lib/postgresql/10/main a-hahn/openstreetmap-tile-server import
+    docker run -v /absolute/path/to/luxembourg.osm.pbf:/data.osm.pbf -v openstreetmap-data:/var/lib/postgresql/10/main cogitoweb/openstreetmap-tile-server import
 
 If the container exits without errors, then your data has been successfully imported and you are now ready to run the tile server.
 
-## Running the server
+## Running the server (with performance tuning and preserving tiles)
 
 Run the server like this:
 
-    docker run --shm-size 14g -p 80:80 -v osm-europe-data:/var/lib/postgresql/10/main -v /home/ubuntu/osm:/etc/postgresql/10/main/conf.d a-hahn/openstreetmap-tile-server:latest run
+    docker run --shm-size 8g -e THREADS=8 -p 80:80 -p 443:443 -v openstreetmap-data:/var/lib/postgresql/10/main -v /etc/ssl/cogito:/etc/ssl/cogito -v openstreetmap-rendered-tiles:/var/lib/mod_tile cogitoweb/openstreetmap-tile-server:latest run
 
 Your tiles will now be available at http://localhost:80/tile/{z}/{x}/{y}.png. If you open `leaflet-demo.html` in your browser, you should be able to see the tiles served by your own machine. Note that it will initially quite a bit of time to render the larger tiles for the first time.
 
-## Debugging the service mode
+## Performance tuning
 
-Just substitute the 'run' command with 'debug' like so:
+The import and tile serving processes use 4 threads by default, but this number can be changed by setting the `THREADS` environment variable. For example:
 
-    docker run --shm-size 14g -p 80:80 -v osm-europe-data:/var/lib/postgresql/10/main -v /home/ubuntu/osm:/etc/postgresql/10/main/conf.d a-hahn/openstreetmap-tile-server:latest debug
+    docker run -p 80:80 -e THREADS=24 -v openstreetmap-data:/var/lib/postgresql/10/main -d cogitoweb/openstreetmap-tile-server run
 
 ## Preserving rendered tiles
 
 Tiles that have already been rendered will be stored in `/var/lib/mod_tile`. To make sure that this data survives container restarts, you should create another volume for it:
 
     docker volume create openstreetmap-rendered-tiles
-    docker run -p 80:80 -v openstreetmap-data:/var/lib/postgresql/10/main -v openstreetmap-rendered-tiles:/var/lib/mod_tile -d a-hahn/openstreetmap-tile-server run
+    docker run -p 80:80 -v openstreetmap-data:/var/lib/postgresql/10/main -v openstreetmap-rendered-tiles:/var/lib/mod_tile -d cogitoweb/openstreetmap-tile-server run
 
-## Performance tuning
+## Debugging the service mode
 
-The import and tile serving processes use 4 threads by default, but this number can be changed by setting the `THREADS` environment variable. For example:
+Just substitute the 'run' command with 'debug' like so:
 
-    docker run -p 80:80 -e THREADS=24 -v openstreetmap-data:/var/lib/postgresql/10/main -d a-hahn/openstreetmap-tile-server run
+    docker run --shm-size 14g -p 80:80 -v osm-europe-data:/var/lib/postgresql/10/main -v /home/ubuntu/osm:/etc/postgresql/10/main/conf.d cogitoweb/openstreetmap-tile-server:latest debug
 
 ## License
 
 ```
-Copyright 2018 Alexander Overvoorde
+Copyright 2018 Cogito
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
